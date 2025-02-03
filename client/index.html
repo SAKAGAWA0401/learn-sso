@@ -9,7 +9,7 @@
     async function checkSession() {
       try {
         // サーバー側の /api/session エンドポイントにリクエストを送信
-        const response = await fetch('/api/session', { credentials: 'include' });
+        const response = await fetch(`${API_BASE_URL}/api/session`, { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
           // サーバーからユーザー情報が返ってきた場合（例：email）
