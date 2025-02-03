@@ -7,7 +7,7 @@
   <script>
     // ページ読み込み時に認証状態をチェックする関数
     async function checkSession() {
-        const API_BASE_URL = process.env.API_BASE_URL;
+        const API_BASE_URL = "<%= process.env.API_BASE_URL %>";
         try {
             // サーバー側の /api/session エンドポイントにリクエストを送信
             const response = await fetch(`${API_BASE_URL}/api/session`, { credentials: 'include' });
