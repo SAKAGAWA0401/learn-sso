@@ -1,21 +1,20 @@
 // server/index.js
 const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// JWT の検証に使用するシークレット（本番環境では環境変数などで管理）
+const cors = require('cors');
+app.use(cors({
+  origin: 'https://learn-sso.sloperiver.com', // クライアント側のオリジンを許可
+  credentials: true // Cookie などの認証情報も許可する場合
+}));
+
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+const jwt = require('jsonwebtoken');
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.AUTH_SECRET;
 
-app.use(cookieParser());
-// CORS の設定
-app.use(cors({
-    origin: 'https://learn-sso.sloperiver.com', // クライアント側のオリジンを許可
-    credentials: true // Cookie などの認証情報も許可する場合
-  }));
 // JSON ボディのパース（JSON形式のリクエストがある場合）
 app.use(express.json());
 // POST の body を解析するためのミドルウェア（signout 用）
