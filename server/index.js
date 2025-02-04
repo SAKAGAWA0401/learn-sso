@@ -55,13 +55,12 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// AUTH_SECRET は128文字の16進数文字列で、これを正しく変換して64バイトのBufferを得る
-const keyBuffer = Buffer.from(process.env.AUTH_SECRET, 'hex'); // 64バイト
-// SHA-512 ハッシュで 64 バイトの鍵を生成する
-const derivedKey = crypto.createHash('sha512').update(keyBuffer).digest();
-console.log('Derived key length:', derivedKey.length); // 64 バイトを確認
-
 async function verifyJWE(token) {
+  // AUTH_SECRET は128文字の16進数文字列で、これを正しく変換して64バイトのBufferを得る
+  const keyBuffer = Buffer.from(process.env.AUTH_SECRET, 'hex'); // 64バイト
+  // SHA-512 ハッシュで 64 バイトの鍵を生成する
+  const derivedKey = crypto.createHash('sha512').update(keyBuffer).digest();
+  console.log('Derived key length:', derivedKey.length); // 64 バイトを確認  
   try {
     const { payload, protectedHeader } = await jwtDecrypt(token, derivedKey, {
       algorithms: ['A256CBC-HS512']  // トークンのヘッダーに合わせる
