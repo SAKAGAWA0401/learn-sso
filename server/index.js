@@ -11,6 +11,7 @@ app.use(cors({
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const crypto = require('crypto');
 const { jwtDecrypt } = require('jose');
 
 const PORT = process.env.PORT || 3000;
@@ -54,21 +55,17 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// AUTH_SECRET は128文字の16進数文字列で、これを正しく変換して64バイトのBufferを得る
+const keyBuffer = Buffer.from(process.env.AUTH_SECRET, 'hex'); // 64バイト
+const secretKey = crypto.createSecretKey(keyBuffer);
+
 async function verifyJWE(token) {
   try {
-    // AUTH_SECRET を16進数文字列からバイナリデータに変換
-    const keyBuffer = Buffer.from(process.env.AUTH_SECRET, 'hex');
-    console.log('Key length in bytes:', keyBuffer.length); // 64 バイトであることを確認
-
-    // jwtDecrypt を使ってトークンを復号
-    const { payload, protectedHeader } = await jwtDecrypt(token, keyBuffer, {
-      // ここでは Auth.js のデフォルト暗号アルゴリズム A256CBC-HS512 を指定
-      algorithms: ['A256CBC-HS512']
+    const { payload, protectedHeader } = await jwtDecrypt(token, secretKey, {
+      algorithms: ['A256CBC-HS512']  // トークンのヘッダーに合わせる
     });
-    
     console.log('Protected Header:', protectedHeader);
     console.log('Decoded Payload:', payload);
-
     return payload;
   } catch (err) {
     console.error('JWE verification failed:', err);
