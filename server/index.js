@@ -11,7 +11,8 @@ app.use(cors({
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-const jwt = require('jsonwebtoken');
+const { jwtDecrypt } = require('jose');
+
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.AUTH_SECRET;
 
@@ -30,8 +31,8 @@ app.get('/api/session', (req, res) => {
   if (token) {
     try {
       // JWT を検証（例として email クレームが含まれていると想定）
-      const decoded = jwt.verify(token, JWT_SECRET);
-      return res.json({ email: decoded.email });
+      const payload = verifyJWE(token);
+      return res.json({ email: payload.email });
     } catch (err) {
       console.error('JWT verification failed:', err);
       // トークンが無効の場合は 401 を返す
@@ -53,3 +54,24 @@ app.post('/signout', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+async function verifyJWE(token) {
+  try {
+    // AUTH_SECRET を元に鍵を生成（TextEncoder を使用）
+    const secretKey = new TextEncoder().encode(JWT_SECRET);
+
+    // jwtDecrypt を使ってトークンを復号
+    const { payload, protectedHeader } = await jwtDecrypt(token, secretKey, {
+      // ここでは Auth.js のデフォルト暗号アルゴリズム A256CBC-HS512 を指定
+      algorithms: ['A256CBC-HS512']
+    });
+    
+    console.log('Protected Header:', protectedHeader);
+    console.log('Decoded Payload:', payload);
+
+    return payload;
+  } catch (err) {
+    console.error('JWE verification failed:', err);
+    throw err;
+  }
+}
