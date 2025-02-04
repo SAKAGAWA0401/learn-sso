@@ -1,5 +1,6 @@
 // server/index.js
 const express = require('express');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 
@@ -10,6 +11,11 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.AUTH_SECRET;
 
 app.use(cookieParser());
+// CORS の設定
+app.use(cors({
+    origin: 'https://learn-sso.sloperiver.com', // クライアント側のオリジンを許可
+    credentials: true // Cookie などの認証情報も許可する場合
+  }));
 // POST の body を解析するためのミドルウェア（signout 用）
 app.use(express.urlencoded({ extended: true }));
 
@@ -18,6 +24,7 @@ app.use(express.static('../client'));
 
 // /api/session エンドポイント
 app.get('/api/session', (req, res) => {
+  console.log(req);
   const token = req.cookies['__Secure-authjs.session-token'];
   if (token) {
     try {
