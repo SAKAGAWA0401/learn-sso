@@ -24,8 +24,9 @@ app.use(express.static('../client'));
 
 // /api/session エンドポイント
 app.get('/api/session', (req, res) => {
-  console.log(req);
+  console.log(req.cookies);
   const token = req.cookies['__Secure-authjs.session-token'];
+  console.log(token);
   if (token) {
     try {
       // JWT を検証（例として email クレームが含まれていると想定）
