@@ -16,17 +16,25 @@ app.use(cors({
     origin: 'https://learn-sso.sloperiver.com', // クライアント側のオリジンを許可
     credentials: true // Cookie などの認証情報も許可する場合
   }));
+// JSON ボディのパース（JSON形式のリクエストがある場合）
+app.use(express.json());
 // POST の body を解析するためのミドルウェア（signout 用）
 app.use(express.urlencoded({ extended: true }));
 
 // 静的ファイルの提供（client ディレクトリ内の index.html など）
 app.use(express.static('../client'));
 
+// リクエストヘッダーをログ出力
+app.use((req, res, next) => {
+  console.log('Request Headers:', req.headers);
+  next();
+});
+
 // /api/session エンドポイント
 app.get('/api/session', (req, res) => {
+  console.log('Inside /api/session route');
   console.log(req.cookies);
   const token = req.cookies['__Secure-authjs.session-token'];
-  console.log(token);
   if (token) {
     try {
       // JWT を検証（例として email クレームが含まれていると想定）
