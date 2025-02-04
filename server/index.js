@@ -14,7 +14,6 @@ app.use(cookieParser());
 const { jwtDecrypt } = require('jose');
 
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.AUTH_SECRET;
 
 // JSON ボディのパース（JSON形式のリクエストがある場合）
 app.use(express.json());
@@ -57,11 +56,12 @@ app.listen(PORT, () => {
 
 async function verifyJWE(token) {
   try {
-    // AUTH_SECRET を元に鍵を生成（TextEncoder を使用）
-    const secretKey = new TextEncoder().encode(JWT_SECRET);
+    // AUTH_SECRET を16進数文字列からバイナリデータに変換
+    const keyBuffer = Buffer.from(process.env.AUTH_SECRET, 'hex');
+    console.log('Key length in bytes:', keyBuffer.length); // 64 バイトであることを確認
 
     // jwtDecrypt を使ってトークンを復号
-    const { payload, protectedHeader } = await jwtDecrypt(token, secretKey, {
+    const { payload, protectedHeader } = await jwtDecrypt(token, keyBuffer, {
       // ここでは Auth.js のデフォルト暗号アルゴリズム A256CBC-HS512 を指定
       algorithms: ['A256CBC-HS512']
     });
